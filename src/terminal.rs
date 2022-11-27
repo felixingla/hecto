@@ -48,6 +48,16 @@ impl Terminal {
         io::stdout().flush()
     }
 
+    //fn to hide cursor
+    pub fn cursor_hide() {
+        print!("{}", termion::cursor::Hide);
+    }
+
+    //fn to show cursor
+    pub fn cursor_show() {
+        print!("{}", termion::cursor::Show);
+    }
+
     //fn to read key inputs on terminal
     pub fn read_key() -> Result<Key, std::io::Error> {
         loop {
