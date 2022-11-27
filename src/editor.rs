@@ -1,21 +1,19 @@
-use std::io::{self, stdout, Write};
-//termion is a library for low-level handling, manipulating and reading information about terminals
+//import Terminal
+use crate::Terminal;
+//import termion, a library for low-level handling, manipulating and reading information about terminals
 use termion::event::Key;
-use termion::input::TermRead;
-use termion::raw::IntoRawMode;
 
-//srtuct for the Editor
+
+
+//srtuct for the editor
 pub struct Editor {
     should_quit: bool,
+    terminal: Terminal,
 }
 
-//implementation of the Edtior
+//implementation of the editor
 impl Editor {
     pub fn run(&mut self) {
-
-        //set the terminal into raw mode (raw mode doesn't print out automatically)
-        let _stdout = stdout().into_raw_mode().unwrap();
-
         //loop to handle all inputs
         loop {
             if let Err(error) = self.refresh_screen() {
@@ -29,28 +27,36 @@ impl Editor {
             }
         }
     }
+
+    //initialize the editor in default
     pub fn default() -> Self {
-        Self { should_quit: false }
+        Self { 
+            should_quit: false,
+
+            /*We unwrap the Terminal with expect, which does the 
+            following: If we have a value, we return it. If we
+             don’t have a value, we panic with the text passed to expect */
+            terminal: Terminal::default().expect("Failed to initialize terminal"),
+        }
     }
 
     //fn to clear and setup the screen
     fn refresh_screen(&self) -> Result<(), std::io::Error> {
-        print!("{}{}", termion::clear::All, termion::cursor::Goto(1, 1));
-        
+        Terminal::clear_screen();
+        Terminal::cursor_position(0, 0);
         if self.should_quit {            
             println!("Goodbye.\r");            
         } else {
             self.draw_rows();
-            print!("{}", termion::cursor::Goto(1,1));
+            Terminal::cursor_position(0, 0);
         }
-
-        io::stdout().flush()
+        Terminal::flush()
     }
 
     //fn to process the key press
     fn process_keypress(&mut self) -> Result<(), std::io::Error> {
-        //store the key redca
-        let pressed_key = read_key()?;
+        //store the red key
+        let pressed_key = Terminal::read_key()?;
         match pressed_key {
             Key::Ctrl('a') => self.should_quit = true,
             _ => (),
@@ -60,23 +66,15 @@ impl Editor {
 
     //fn to draw ~ in all lines
     fn draw_rows(&self) {
-        for _ in 0..24 {
+        for _ in 0..self.terminal.size().height {
             println!("~\r");
         }
     }
 
 }
 
-//fn to read keys
-fn read_key() -> Result<Key, std::io::Error> {
-    loop {
-        if let Some(key) = io::stdin().lock().keys().next() {
-            return key;
-        }
-    }
-}
 
 fn die(e: std::io::Error) {
-    print!("{}", termion::clear::All);
+    Terminal::clear_screen();
     panic!("{}", e);
 }
