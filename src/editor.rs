@@ -1,3 +1,5 @@
+//import Document
+use crate::Document;
 //import Terminal
 use crate::Terminal;
 //import termion, a library for low-level handling, manipulating and reading information about terminals
@@ -16,6 +18,7 @@ pub struct Editor {
     should_quit: bool,
     terminal: Terminal,
     cursor_position: Position,
+    document: Document,
 }
 
 //implementation of the editor
@@ -45,6 +48,7 @@ impl Editor {
             following: If we have a value, we return it. If we
              don’t have a value, we panic with the text passed to expect */
             terminal: Terminal::default().expect("Failed to initialize terminal"),
+            document: Document::default(),
             cursor_position: Position { x: 0, y: 0 },
         }
     }
